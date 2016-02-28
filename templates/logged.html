@@ -1,0 +1,253 @@
+{% extends "layout.html" %}
+			
+{% block body %}
+				
+			<!--	<p>{{ session['username'] }} - Successfull</p>
+				<a href=''> Sign out</a> -->
+
+		<!--	<div class="acheivments" id="dashboard">
+
+			<nav class="navbar navbar-default">
+			  <div class="container-fluid">
+				<div class="navbar-header"> <h3>Dashboard</h3>
+				
+					
+				  </a> 
+				</div>
+			  </div>
+			</nav>
+			
+				<div class="container">
+					<div class="row">
+						<div class="col-md-6">
+							
+								<div class="panel-body">
+									<div class="row">
+										<div >
+										
+										  
+										  <a href="#" class="btn btn-warning btn-lg" role="button"><span class="big">5</span> <br/>Open Tickets </a>
+
+										   <a href="#" class="btn btn-danger btn-lg" role="button"><span class="big">11</span> <br/>Notifications </a>
+
+										  <a href="#" class="btn btn-success btn-lg" role="button"><span class="big">12</span> <br/>Total Tickets </a>
+
+										
+									</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+          </div> -->
+
+
+
+
+
+
+		   
+
+
+		 <div id="alltickets" class="acheivments">
+		 <nav class="navbar navbar-default">
+			  <div class="container-fluid">
+
+				<div class="navbar-header"><h3>All tickets</h3>
+				 <!-- <a class="navbar-brand" href="#">
+					<img alt="Brand" src="..."> 
+				  </a> -->
+				</div>
+			  </div>
+			</nav>
+
+			
+			<div class="container">
+				<table class="table table-striped table-bordered table-condensed table-hover">
+					<thead>
+						<th> Ticket ID </th>
+						<th> Description </th>
+						<th> Category </th>
+						<th> Status </th>
+					</thead>
+
+					<tbody id="table-body">
+					
+					</tbody>
+				</table>
+              </div>
+				<div class="container" id="loadContainer">
+				<button class="btn btn-lg btn-success"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...</button>
+			    </div>
+		</div>
+         <script>
+         
+			 $(document).ready(function() {
+				   
+                    var $gloader = $("#loadContainer");
+					$.get('/gettkts', null)
+					  .success(function (data) {
+						  var $table = $('#table-body');
+						  
+						  //console.log(data);
+						  response = $.parseJSON(data);
+						  //console.log(response);
+						  $table.empty();
+						  $(function() {
+								$.each(response, function(i, item) {
+									
+									var stateString="";
+									switch (item.state) {
+										case '1':
+											stateString = "New";
+											break;
+										case '2':
+											stateString = "Active";
+											break;
+										case '3':
+											stateString = "Awaiting Problem";
+											break;
+										case '4':
+											stateString = "Awaiting User Info";
+											break;
+										case '5':
+											stateString = "Awaiting Evidence";
+											break;
+										case '6':
+											stateString = "Resolved";
+											break;
+										case '7':
+											stateString = "Closed";
+											break;
+										case '8':
+											stateString = "Work in Progress";
+											break;
+									    default: 
+										    stateString = "Unknown";
+									}
+									if(item.short_description.length>2)
+									{
+										var $tr = $('<tr>').append(
+											$('<td>').text(item.number),
+											$('<td>').text(item.short_description),
+											$('<td>').text(item.category),
+											$('<td>').text(stateString)
+										).appendTo($table);
+									//console.log($tr.wrap('<p>').html());
+									}
+								});
+							$gloader.hide();
+					      });
+ 
+			           });
+
+					   
+
+					$("#getcatg").click(function(e){
+							  e.preventDefault();
+							  var $colist = $('#catoptionlist'); 
+							$.ajax({type: "POST",
+									url: "/getcats",
+                                    dataType: 'json',
+									contentType: "application/json",
+									data: JSON.stringify({ doc: $("#tktdesc").val(), botName:'UCSFSmall'}),
+									success:function(result){
+										   //console.log(result);
+							               response = $.parseJSON(result);
+                                           $colist.empty();
+										   //console.log(response);
+ 										  // console.log(response.result[0].Group);
+										    $(function() {
+															$.each(response.result, function(i, item) {
+                                                              if(item.Group=='Password Reset')
+																{
+																  var lis = $('<li>Password Reset - Self Service</li>')
+																  lis.append($('<input>').attr('type', 'radio').attr('name','optCategory').attr('value', 'Password Reset - Self Service'));
+																  $colist.append(lis); 
+																}
+
+                                                              var lis = $('<li>'+item.Group+'</li>')
+															  lis.append($('<input>').attr('type', 'radio').attr('name','optCategory').attr('value', item.Group));
+														      $colist.append(lis); 
+																													
+																//$colist.append($('<option>').text(item.Group).attr('value', item.Group));
+															});
+														
+													  });
+
+							}});
+						  });
+
+                });
+				
+         </script>
+
+
+
+
+
+
+
+
+
+
+		  
+		  <div class="acheivments" id="newticket">
+			  <nav class="navbar navbar-default">
+				  <div class="container-fluid">
+					<div class="navbar-header"> <h3>Create new ticket</h3>
+					  <!-- <a class="navbar-brand" href="#">
+						<img alt="Brand" src="..."> 
+					  </a> -->
+					</div>
+				  </div>
+				</nav>
+
+		 
+					  <div class="container">
+							<div class="col-lg-9 col-md-9 col-sm-9">
+						   
+							   
+								<form action="{{url_for('createtkt')}}" method="POST">
+								   
+									<div class="form-group col-lg-12 col-md-12 col-sm-12">
+										<label>{{session['username']}}, How can i help you?</label>
+										<textarea name="tktdesc" id="tktdesc" class="form-control" rows="7"></textarea>
+									</div>
+								    <div id="catoptions">
+										<div class="form-group col-lg-12 col-md-12 col-sm-12">
+											<button type="button" id="getcatg" class="btn btn-primary">Get Category</button>
+										</div>
+
+                                    </div>
+									<div class="form-group col-lg-12 col-md-12 col-sm-12">
+									<p><b>Please select the category</b></p>
+									 <div class="form-group col-lg-6 col-md-6 col-sm-6" id="catoptiondiv"><ul id="catoptionlist"></ul></div>
+									</div>
+
+									<div class="form-group col-lg-4 col-md-4 col-sm-4">
+										<label>Urgency?</label>
+										<select name="tktprty" id="tktprty" class="form-control">
+										<option value="1">High</option>
+											<option value="2">Medium</option>
+											<option value="3">Low</option>
+										</select>
+									</div>
+									
+								  
+									<div class="form-group col-lg-12 col-md-12 col-sm-12">
+										<button type="submit" class="btn btn-primary">Submit Ticket</button>
+									</div>
+								</form>
+					   </div>
+                </div>
+            </div>
+
+
+
+
+
+            </div>
+
+    
+{% endblock %}		

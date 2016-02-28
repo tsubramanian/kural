@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+			
+{% block body %}
+				
+			   
+
+
+		 <div id="last10tick" class="acheivments">
+		 <nav class="navbar navbar-default">
+			  <div class="container-fluid">
+
+				<div class="navbar-header"><h3>Last 10 tickets</h3>
+				 <!-- <a class="navbar-brand" href="#">
+					<img alt="Brand" src="..."> 
+				  </a> -->
+				</div>
+			  </div>
+			</nav>
+
+			
+			<div class="container">
+				<table class="table table-striped table-bordered table-condensed table-hover">
+					<thead>
+						<th> Ticket ID </th>
+						<th> Description </th>
+						<th> Category </th>
+						<th> Status </th>
+					</thead>
+
+					<tbody id="table-body">
+					
+					</tbody>
+				</table>
+              </div>
+				<div class="container" id="loadContainer">
+				    <img class="img-responsive center-block" src="{{ url_for('static', filename='images/3.gif') }}"/>  <!-- <button class="btn btn-lg btn-success"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...</button> -->
+			    </div>
+		</div>
+         <script>
+         
+			 $(document).ready(function() {
+				   
+                    var $gloader = $("#loadContainer");
+					$.get('/gettkts2', null)
+					  .success(function (data) {
+						  var $table = $('#table-body');
+						  
+						  //console.log(data);
+						  response = $.parseJSON(data);
+						 // console.log(response);
+						  $table.empty();
+						  $(function() {
+								$.each(response, function(i, item2) {
+								$.each(item2, function(i, item) {
+									console.log(item);
+									var stateString="";
+									switch (item.state) {
+										case '1':
+											stateString = "New";
+											break;
+										case '2':
+											stateString = "Active";
+											break;
+										case '3':
+											stateString = "Awaiting Problem";
+											break;
+										case '4':
+											stateString = "Awaiting User Info";
+											break;
+										case '5':
+											stateString = "Awaiting Evidence";
+											break;
+										case '6':
+											stateString = "Resolved";
+											break;
+										case '7':
+											stateString = "Closed";
+											break;
+										case '8':
+											stateString = "Work in Progress";
+											break;
+									    default: 
+										    stateString = "Unknown";
+									}
+									if(item.short_description.length>2)
+									{
+										var $tr = $('<tr>').append(
+											$('<td>').text(item.number),
+											$('<td>').text(item.short_description),
+											$('<td>').text(item.category),
+											$('<td>').text(stateString)
+										).appendTo($table);
+									//console.log($tr.wrap('<p>').html());
+									}
+								});
+							$gloader.hide();
+					      }); });
+ 
+			           });
+
+					   
+
+					
+                });
+				
+         </script>
+
+
+
+
+
+
+
+
+
+
+		  
+		
+
+
+
+
+
+            </div>
+
+    
+{% endblock %}		
